@@ -1,14 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
 using System.Net.Http.Headers;
 
-namespace Program
+namespace VeeamFolderSynchronizer
 {
-    class Program
+    internal class Program
     {
         public static Boolean isValidArgs(string commandArgs)
         {
-            if (commandArgs.Contains("--sourcePath=") && commandArgs.Contains("--replicaPath=") 
+            if (commandArgs.Contains("--sourcePath=") && commandArgs.Contains("--replicaPath=")
                 && commandArgs.Contains("--timeInterval=") && commandArgs.Contains("--logPath="))
             {
                 return true;
@@ -16,8 +21,9 @@ namespace Program
             return false;
         }
 
-        public static String getParamValue(String param) {
-            return param.Split("=").Last();
+        public static String getParamValue(String param)
+        {
+            return param.Split('=').Last();
         }
 
         public static Boolean validatePaths(String sourcePath, String replicaPath, String logPath)
@@ -47,7 +53,8 @@ namespace Program
                     Console.WriteLine($"The {invalidPath} folder was not found. Please try again.");
                     return false;
                 }
-            } else
+            }
+            else
             {
                 return true;
             }
@@ -61,11 +68,12 @@ namespace Program
             {
                 timeIntervalNumber = Int32.Parse(timeInterval);
 
-                if(timeIntervalNumber <= 0)
+                if (timeIntervalNumber <= 0)
                 {
                     Console.WriteLine("The parameter '--timeInterval' should not be negative", ConsoleColor.Red);
                     return -1;
-                } else
+                }
+                else
                 {
                     return timeIntervalNumber;
                 }
@@ -81,13 +89,13 @@ namespace Program
         {
             String sourcePath = "", replicaPath = "", timeInterval = "", logPath = "";
 
-            String commandLineArgs = Environment.CommandLine.ToString();      
+            String commandLineArgs = Environment.CommandLine.ToString();
 
             if (isValidArgs(commandLineArgs))
             {
                 List<String> listArgs = new List<String>();
 
-                String[] commandArgs = commandLineArgs.Split(" ");
+                String[] commandArgs = commandLineArgs.Split(' ');
 
                 foreach (String command in commandArgs)
                 {
@@ -101,10 +109,10 @@ namespace Program
 
                 if (validatePaths(sourcePath, replicaPath, logPath) && timeIntervalNumber != -1)
                 {
-                    Console.WriteLine("working"); // inplement the code
+                    Console.WriteLine("working"); // implement the code
                 }
-
-            } else
+            }
+            else
             {
                 Console.WriteLine("ERROR_MESSAGE", ConsoleColor.Red);
             }
