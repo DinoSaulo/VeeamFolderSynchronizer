@@ -143,6 +143,12 @@ namespace VeeamFolderSynchronizer
 
             String commandLineArgs = Environment.CommandLine.ToString();
 
+            String helpMessage = $"Usage: dotnet run --sourcePath=[sourcePath]  --replicaPath=[replicaPath] --timeInterval=[timeInterval] --logPath=[logPath]\n"+
+                    "\t\tsourcePath\tRoot path that willl be synchronized\n" +
+                    "\t\treplicaPath\tPath to the folder that will be receive the modifications\n" +
+                    "\t\ttimeInterval\tTime in munutes to synchronize the folder again\n"+
+                    "\t\tlogPath\t\tPath what will register the logs of synchronizer execution";
+
             if (isValidArgs(commandLineArgs))
             {
                 List<String> listArgs = new List<String>();
@@ -177,11 +183,14 @@ namespace VeeamFolderSynchronizer
                     }
 
                     logAndPrintAction(logPath, "Sync completed!");
-                } 
+                } else
+                {
+                    Console.WriteLine(helpMessage, ConsoleColor.Red);
+                }
             }
             else
             {
-                Console.WriteLine("ERROR_MESSAGE", ConsoleColor.Red);
+                Console.WriteLine(helpMessage, ConsoleColor.Red);
             }
         }
     }
