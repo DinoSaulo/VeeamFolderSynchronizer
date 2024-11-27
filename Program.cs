@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 
-namespace VeeamFolderSynchronizer
+namespace Program
 {
     internal class Program
     {
@@ -82,24 +81,13 @@ namespace VeeamFolderSynchronizer
             }
         }
 
-        public static void logAndPrintAction(String logPath, String logMessage)
-        {
-            var utcNow = DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss");
-
-            String message =  $"{logMessage} - {utcNow}";
-            
-            File.AppendAllLines(Path.Combine(logPath, "log.txt"), [ message ]);
-
-            Console.WriteLine(message);
-        }
-
         static void Main(string[] args)
         {
             String sourcePath = "", replicaPath = "", timeInterval = "", logPath = "";
 
-            //String commandLineArgs = "run --sourcePath=C:\\sourcePath --replicaPath=C:\\replicaPath --timeInterval=54 --logPath=C:\\logPath";
+            String commandLineArgs = "run --sourcePath=C:\\sourcePath --replicaPath=C:\\replicaPath --timeInterval=54 --logPath=C:\\logPath";
 
-            String commandLineArgs = Environment.CommandLine.ToString();
+            //String commandLineArgs = Environment.CommandLine.ToString();
 
             if (isValidArgs(commandLineArgs))
             {
@@ -119,7 +107,7 @@ namespace VeeamFolderSynchronizer
 
                 if (validatePaths(sourcePath, replicaPath, logPath) && timeIntervalNumber != -1)
                 {
-                    logAndPrintAction(logPath, "Starting folder synchronizer...");
+                    Console.WriteLine("working"); // implement the code
                 }
             }
             else
