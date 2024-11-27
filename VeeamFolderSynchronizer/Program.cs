@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -69,7 +70,7 @@ namespace VeeamFolderSynchronizer
 
                 if (timeIntervalNumber <= 0)
                 {
-                    Console.WriteLine("The parameter '--timeInterval' should not be negative", ConsoleColor.Red);
+                    Console.WriteLine("The parameter '--timeInterval' should not be negative.", ConsoleColor.Red);
                     return -1;
                 }
                 else
@@ -95,26 +96,44 @@ namespace VeeamFolderSynchronizer
             Console.WriteLine(message);
         }
 
-
-        public static String computeFileHash(String filePath)
+        public static void syncDirectories(String sourcePath, String replicaPath, String logPath)
         {
-            FileStream file = new FileStream(filePath, FileMode.Open);
-            MD5 md5 = new MD5CryptoServiceProvider();
-            byte[] retVal = md5.ComputeHash(file);
-            file.Close();
+            DirectoryInfo sourceFolder = new DirectoryInfo(sourcePath);
 
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < retVal.Length; i++)
-            {
-                sb.Append(retVal[i].ToString("x2"));
+            // copy
+            foreach (FileInfo file in sourceFolder.GetFiles()) {
+                string replicaFilePath = Path.Combine(replicaPath, file.Name);
+                Boolean overwriteFile = true;
+                String logAndPrintMessage = "";
+                if (File.Exists(replicaFilePath))
+                {
+                    if (File.GetLastWriteTime(replicaFilePath) < file.LastWriteTime) {
+                        overwriteFile = true;
+                        logAndPrintMessage = $"The {file.FullName} was modified. Replicating the modification in {replicaFilePath}";
+                    }
+                } else
+                {
+                    overwriteFile = false;
+                    logAndPrintMessage = $"The {file.FullName} was copied to {replicaFilePath}";
+                }
+
+                if(logAndPrintMessage != "")
+                {
+                    file.CopyTo(replicaFilePath, overwriteFile);
+                    logAndPrintAction(logPath, logAndPrintMessage);
+                }
             }
-            Console.WriteLine(sb.ToString());
 
-            return sb.ToString();
-
+            // delete
+            foreach (FileInfo file in new DirectoryInfo(replicaPath).GetFiles())
+            {
+                string sourceFilePath = Path.Combine(sourcePath, file.Name);
+                if (!File.Exists(sourceFilePath)) {
+                    file.Delete();
+                    logAndPrintAction(logPath, $"The {file.FullName} was deleted in {replicaPath}");
+                }
+            }
         }
-
-       
 
         static void Main(string[] args)
         {
@@ -142,9 +161,23 @@ namespace VeeamFolderSynchronizer
 
                 if (validatePaths(sourcePath, replicaPath, logPath) && timeIntervalNumber != -1)
                 {
-                    logAndPrintAction(logPath, $"Staring to monitoring the folder: {logPath}");
+                    logAndPrintAction(logPath, $"Staring to monitoring the folder: {sourcePath}");
 
-                }
+                    while (true)
+                    {
+                        try
+                        {
+                            syncDirectories(sourcePath, replicaPath, logPath);
+                        }
+                        catch (Exception exception)
+                        {
+                            logAndPrintAction(logPath, $"Sync failed: {exception.Message}");
+                        }
+                        System.Threading.Thread.Sleep(timeIntervalNumber * 60 * 1000);
+                    }
+
+                    logAndPrintAction(logPath, "Sync completed!");
+                } 
             }
             else
             {
