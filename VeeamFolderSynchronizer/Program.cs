@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace VeeamFolderSynchronizer
 {
@@ -93,6 +95,27 @@ namespace VeeamFolderSynchronizer
             Console.WriteLine(message);
         }
 
+
+        public static String computeFileHash(String filePath)
+        {
+            FileStream file = new FileStream(filePath, FileMode.Open);
+            MD5 md5 = new MD5CryptoServiceProvider();
+            byte[] retVal = md5.ComputeHash(file);
+            file.Close();
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < retVal.Length; i++)
+            {
+                sb.Append(retVal[i].ToString("x2"));
+            }
+            Console.WriteLine(sb.ToString());
+
+            return sb.ToString();
+
+        }
+
+       
+
         static void Main(string[] args)
         {
             String sourcePath = "", replicaPath = "", timeInterval = "", logPath = "";
@@ -119,7 +142,8 @@ namespace VeeamFolderSynchronizer
 
                 if (validatePaths(sourcePath, replicaPath, logPath) && timeIntervalNumber != -1)
                 {
-                    logAndPrintAction(logPath, "Starting folder synchronizer...");
+                    logAndPrintAction(logPath, $"Staring to monitoring the folder: {logPath}");
+
                 }
             }
             else
