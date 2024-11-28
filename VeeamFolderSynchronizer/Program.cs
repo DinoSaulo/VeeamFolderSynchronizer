@@ -70,7 +70,7 @@ namespace VeeamFolderSynchronizer
 
                 if (timeIntervalNumber <= 0)
                 {
-                    Console.WriteLine("The parameter '--timeInterval' should not be negative.", ConsoleColor.Red);
+                    Console.WriteLine("The parameter '--timeInterval' should not be negative.");
                     return -1;
                 }
                 else
@@ -80,7 +80,7 @@ namespace VeeamFolderSynchronizer
             }
             else
             {
-                Console.WriteLine("The parameter '--timeInterval' is not a valid number", ConsoleColor.Red);
+                Console.WriteLine("The parameter '--timeInterval' is not a valid number");
                 return -1;
             }
         }
@@ -108,7 +108,7 @@ namespace VeeamFolderSynchronizer
                     if (File.GetLastWriteTime(replicaFilePath) < file.LastWriteTime)
                     {
                         overwriteFile = true;
-                        logAndPrintMessage = $"The {file.FullName} was modified. Replicating the modification in {replicaFilePath}";
+                        logAndPrintMessage = $"The '{file.FullName}' was modified. Replicating the modification in '{replicaFilePath}'";
                         file.CopyTo(replicaFilePath, overwriteFile);
                         logAndPrintAction(logPath, logAndPrintMessage);
                     }
@@ -116,7 +116,7 @@ namespace VeeamFolderSynchronizer
                 else
                 {
                     overwriteFile = false;
-                    logAndPrintMessage = $"The {file.FullName} was copied to {replicaFilePath}";
+                    logAndPrintMessage = $"The '{file.FullName}' was copied to '{replicaFilePath}'";
                     file.CopyTo(replicaFilePath, overwriteFile);
                     logAndPrintAction(logPath, logAndPrintMessage);
                 }
@@ -130,7 +130,7 @@ namespace VeeamFolderSynchronizer
                 if (!File.Exists(sourceFilePath))
                 {
                     file.Delete();
-                    logAndPrintAction(logPath, $"The {file.FullName} was deleted in {replicaPath}");
+                    logAndPrintAction(logPath, $"The '{file.FullName}' was deleted in '{replicaPath}'");
                 }
             }
         }
@@ -197,7 +197,7 @@ namespace VeeamFolderSynchronizer
 
                 if (validatePaths(sourcePath, replicaPath, logPath) && timeIntervalNumber != -1)
                 {
-                    logAndPrintAction(logPath, $"Staring to monitoring the folder: {sourcePath}");
+                    logAndPrintAction(logPath, $"Staring to monitoring the folder: '{sourcePath}'");
 
                     while (true)
                     {
@@ -215,12 +215,12 @@ namespace VeeamFolderSynchronizer
                     logAndPrintAction(logPath, "Sync completed!");
                 } else
                 {
-                    Console.WriteLine(helpMessage, ConsoleColor.Red);
+                    Console.WriteLine(helpMessage);
                 }
             }
             else
             {
-                Console.WriteLine(helpMessage, ConsoleColor.Red);
+                Console.WriteLine(helpMessage);
             }
         }
     }
