@@ -26,39 +26,26 @@ namespace VeeamFolderSynchronizer
             return param.Split('=').Last();
         }
 
-        public static Boolean validatePaths(String sourcePath, String replicaPath, String logPath)
+        public static bool validatePaths(string sourcePath, string replicaPath, string logPath)
         {
-            if (!Directory.Exists(sourcePath) || !Directory.Exists(replicaPath) || !Directory.Exists(logPath))
+            var paths = new Dictionary<string, string>
             {
-                String invalidPath = "";
-                if (!Directory.Exists(sourcePath))
-                {
-                    invalidPath = "--sourcePath";
-                }
-                else if (!Directory.Exists(replicaPath))
-                {
-                    invalidPath = "--replicaPath";
-                }
-                else if (!Directory.Exists(logPath))
-                {
-                    invalidPath = "--logPath";
-                }
+                { sourcePath, "--sourcePath" },
+                { replicaPath, "--replicaPath" },
+                { logPath, "--logPath" }
+            };
 
-                if (invalidPath == "")
+            foreach (var path in paths)
+            {
+                if (!Directory.Exists(path.Key))
                 {
-                    return true;
-                }
-                else
-                {
-                    Console.WriteLine($"The {invalidPath} folder was not found. Please try again.");
+                    Console.WriteLine($"The '{path.Value}' folder was not found. Please try again.");
                     return false;
                 }
             }
-            else
-            {
-                return true;
-            }
+            return true;
         }
+
         public static int validateAndConvertTimeInterval(String timeInterval)
         {
             int val = 0;
