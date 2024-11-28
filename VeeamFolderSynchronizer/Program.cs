@@ -13,12 +13,11 @@ namespace VeeamFolderSynchronizer
     {
         public static Boolean isValidArgs(string commandArgs)
         {
-            if (commandArgs.Contains("--sourcePath=") && commandArgs.Contains("--replicaPath=")
-                && commandArgs.Contains("--timeInterval=") && commandArgs.Contains("--logPath="))
-            {
-                return true;
-            }
-            return false;
+            // defining the required args
+            var requiredArgs = new List<string> {"--sourcePath=", "--replicaPath=", "--timeInterval=", "--logPath="};
+
+            // check if all required args present
+            return requiredArgs.All(commandArgs.Contains);
         }
 
         public static String getParamValue(String param)
@@ -28,6 +27,7 @@ namespace VeeamFolderSynchronizer
 
         public static bool validatePaths(string sourcePath, string replicaPath, string logPath)
         {
+            // dictionary to hold paths and their corresponding labels
             var paths = new Dictionary<string, string>
             {
                 { sourcePath, "--sourcePath" },
@@ -35,6 +35,7 @@ namespace VeeamFolderSynchronizer
                 { logPath, "--logPath" }
             };
 
+            // check for invalid paths
             foreach (var path in paths)
             {
                 if (!Directory.Exists(path.Key))
@@ -48,39 +49,37 @@ namespace VeeamFolderSynchronizer
 
         public static int validateAndConvertTimeInterval(String timeInterval)
         {
-            int val = 0;
-            int timeIntervalNumber = -1; //if number is not valid will return -1
-
-            if (Int32.TryParse(timeInterval, out val))
+            if (!int.TryParse(timeInterval, out int timeIntervalNumber))
             {
-                timeIntervalNumber = Int32.Parse(timeInterval);
+                Console.WriteLine("The parameter '--timeInterval' is not a valid number.");
+                return -1; // returning -1 if the number isn't valid
+            }
 
-                if (timeIntervalNumber <= 0)
-                {
-                    Console.WriteLine("The parameter '--timeInterval' should not be negative.");
-                    return -1;
-                }
-                else
-                {
-                    return timeIntervalNumber;
-                }
-            }
-            else
+            if (timeIntervalNumber <= 0)
             {
-                Console.WriteLine("The parameter '--timeInterval' is not a valid number");
-                return -1;
+                Console.WriteLine("The parameter '--timeInterval' must be a positive number.");
+                return -1; // returning -1 if the number isn't positive or zero
             }
+
+            return timeIntervalNumber;
         }
 
         public static void logAndPrintAction(String logPath, String logMessage)
         {
-            var utcNow = DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss");
+            try
+            {
+                var utcNow = DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss");
 
-            String message =  $"{logMessage} - {utcNow}";
+                String message =  $"{logMessage} - {utcNow}";
             
-            File.AppendAllLines(Path.Combine(logPath, "log.txt"), [ message ]);
+                File.AppendAllLines(Path.Combine(logPath, "log.txt"), [ message ]);
 
-            Console.WriteLine(message);
+                Console.WriteLine(message);
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine($"Error logging action: {exception.Message}");
+            }
         }
 
         private static void checkCopyOrCreateFiles(DirectoryInfo sourceFolder, String replicaPath, String logPath)
