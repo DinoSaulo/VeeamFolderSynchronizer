@@ -99,6 +99,7 @@ namespace VeeamFolderSynchronizer
         public static void syncDirectories(String sourcePath, String replicaPath, String logPath)
         {
             DirectoryInfo sourceFolder = new DirectoryInfo(sourcePath);
+            DirectoryInfo[] subFolders = sourceFolder.GetDirectories();
 
             // copy
             foreach (FileInfo file in sourceFolder.GetFiles()) {
@@ -110,15 +111,13 @@ namespace VeeamFolderSynchronizer
                     if (File.GetLastWriteTime(replicaFilePath) < file.LastWriteTime) {
                         overwriteFile = true;
                         logAndPrintMessage = $"The {file.FullName} was modified. Replicating the modification in {replicaFilePath}";
+                        file.CopyTo(replicaFilePath, overwriteFile);
+                        logAndPrintAction(logPath, logAndPrintMessage);
                     }
                 } else
                 {
                     overwriteFile = false;
                     logAndPrintMessage = $"The {file.FullName} was copied to {replicaFilePath}";
-                }
-
-                if(logAndPrintMessage != "")
-                {
                     file.CopyTo(replicaFilePath, overwriteFile);
                     logAndPrintAction(logPath, logAndPrintMessage);
                 }
@@ -133,13 +132,26 @@ namespace VeeamFolderSynchronizer
                     logAndPrintAction(logPath, $"The {file.FullName} was deleted in {replicaPath}");
                 }
             }
+
+            //work in subfolders
+            foreach (DirectoryInfo subFolder in subFolders)
+            {
+                string destSubDirectory = Path.Combine(replicaPath, subFolder.Name);
+                DirectoryInfo destSubDirectoryInfo = new DirectoryInfo(destSubDirectory);
+                if (!destSubDirectoryInfo.Exists)
+                {
+                    destSubDirectoryInfo.Create();
+                    logAndPrintAction(logPath, $"The subfolder '{subFolder.Name}' was created in '{replicaPath}'");
+                }
+                syncDirectories(subFolder.FullName, destSubDirectory, logPath);
+            }
         }
 
         static void Main(string[] args)
         {
             String sourcePath = "", replicaPath = "", timeInterval = "", logPath = "";
 
-            //String commandLineArgs = "run --sourcePath=C:\\sourcePath --replicaPath=C:\\replicaPath --timeInterval=54 --logPath=C:\\logPath";
+            //String commandLineArgs = "run --sourcePath=C:\\sourcePath --replicaPath=C:\\replicaPath --timeInterval=1 --logPath=C:\\logPath";
 
             String commandLineArgs = Environment.CommandLine.ToString();
 
