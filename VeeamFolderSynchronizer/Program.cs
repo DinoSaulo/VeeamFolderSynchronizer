@@ -96,25 +96,24 @@ namespace VeeamFolderSynchronizer
             Console.WriteLine(message);
         }
 
-        public static void syncDirectories(String sourcePath, String replicaPath, String logPath)
+        private static void checkCopyOrCreateFiles(DirectoryInfo sourceFolder, String replicaPath, String logPath)
         {
-            DirectoryInfo sourceFolder = new DirectoryInfo(sourcePath);
-            DirectoryInfo[] subFolders = sourceFolder.GetDirectories();
-
-            // copy
-            foreach (FileInfo file in sourceFolder.GetFiles()) {
+            foreach (FileInfo file in sourceFolder.GetFiles())
+            {
                 string replicaFilePath = Path.Combine(replicaPath, file.Name);
                 Boolean overwriteFile = true;
                 String logAndPrintMessage = "";
                 if (File.Exists(replicaFilePath))
                 {
-                    if (File.GetLastWriteTime(replicaFilePath) < file.LastWriteTime) {
+                    if (File.GetLastWriteTime(replicaFilePath) < file.LastWriteTime)
+                    {
                         overwriteFile = true;
                         logAndPrintMessage = $"The {file.FullName} was modified. Replicating the modification in {replicaFilePath}";
                         file.CopyTo(replicaFilePath, overwriteFile);
                         logAndPrintAction(logPath, logAndPrintMessage);
                     }
-                } else
+                }
+                else
                 {
                     overwriteFile = false;
                     logAndPrintMessage = $"The {file.FullName} was copied to {replicaFilePath}";
@@ -122,18 +121,22 @@ namespace VeeamFolderSynchronizer
                     logAndPrintAction(logPath, logAndPrintMessage);
                 }
             }
+        }
 
-            // delete
+        private static void checkAndDeleteFiles(String sourcePath, String replicaPath, String logPath){
             foreach (FileInfo file in new DirectoryInfo(replicaPath).GetFiles())
             {
                 string sourceFilePath = Path.Combine(sourcePath, file.Name);
-                if (!File.Exists(sourceFilePath)) {
+                if (!File.Exists(sourceFilePath))
+                {
                     file.Delete();
                     logAndPrintAction(logPath, $"The {file.FullName} was deleted in {replicaPath}");
                 }
             }
+        }
 
-            //work in subfolders
+        private static void workWithSubfolders(DirectoryInfo[] subFolders, String replicaPath, String logPath)
+        {
             foreach (DirectoryInfo subFolder in subFolders)
             {
                 string destSubDirectory = Path.Combine(replicaPath, subFolder.Name);
@@ -145,6 +148,21 @@ namespace VeeamFolderSynchronizer
                 }
                 syncDirectories(subFolder.FullName, destSubDirectory, logPath);
             }
+        }
+
+        public static void syncDirectories(String sourcePath, String replicaPath, String logPath)
+        {
+            DirectoryInfo sourceFolder = new DirectoryInfo(sourcePath);
+            DirectoryInfo[] subFolders = sourceFolder.GetDirectories();
+
+            // copy
+            checkCopyOrCreateFiles(sourceFolder, replicaPath, logPath);  
+
+            // delete
+            checkAndDeleteFiles(sourcePath, replicaPath, logPath);
+
+            //work in subfolders
+            workWithSubfolders(subFolders, replicaPath, logPath);
         }
 
         static void Main(string[] args)
