@@ -184,6 +184,7 @@ namespace VeeamFolderSynchronizer
                 if (validatePaths(sourcePath, replicaPath, logPath) && timeIntervalNumber != -1)
                 {
                     logAndPrintAction(logPath, $"Staring to monitoring the folder: '{sourcePath}'");
+                    Console.WriteLine("Press 'CTRL' + 'C' to finish the sync");
 
                     while (true)
                     {
@@ -197,8 +198,6 @@ namespace VeeamFolderSynchronizer
                         }
                         System.Threading.Thread.Sleep(timeIntervalNumber * 60 * 1000);
                     }
-
-                    logAndPrintAction(logPath, "Sync completed!");
                 } else
                 {
                     Console.WriteLine(helpMessage);
