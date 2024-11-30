@@ -9,7 +9,7 @@ using System.Text;
 
 namespace VeeamFolderSynchronizer
 {
-    internal class Program
+    public class Program
     {
         public static Boolean isValidArgs(string commandArgs)
         {
