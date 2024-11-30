@@ -24,7 +24,7 @@ Using the CMD or PowerShell, inside the folder VeeamFolderSynchronizer, execute 
 #### Example command to execute
 
 ```bash
-    run --sourcePath=C:\\sourcePath --replicaPath=C:\\replicaPath --timeInterval=1 --logPath=C:\\logPath
+   dotnet run --sourcePath=C:\\sourcePath --replicaPath=C:\\replicaPath --timeInterval=1 --logPath=C:\\logPath
 ```
 
 ### Parameters description
